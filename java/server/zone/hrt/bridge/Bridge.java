@@ -275,7 +275,7 @@ public class Bridge {
 
   public static void sendPlayerText(Player p, String text) {
     WEBHOOK.sendMessage(getMessageCreator().setContent(text).build()).setUsername(p.getName().tryCollapseToString())
-        .setAvatarUrl(minotar(p, "helm", 128));
+        .setAvatarUrl(minotar(p, "helm", 128)).queue();
   }
 
   public static void sendPlayerText(Player p, String format, Object... args) {
