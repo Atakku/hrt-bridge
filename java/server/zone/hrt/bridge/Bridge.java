@@ -43,6 +43,7 @@ import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.RestConfig;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
@@ -59,13 +60,13 @@ public class Bridge {
   public static final String MOD_ID = "hrt_bridge";
   public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-  public static final String CHANNEL_ID = System.getenv("DISCORD_CHANNEL_ID");
-  public static final String OWNER = System.getenv("DISCORD_OWNER_ID");
+  public static final String CHANNEL_ID = System.getenv("FLUXER_CHANNEL_ID");
+  public static final String OWNER = System.getenv("FLUXER_OWNER_ID");
 
   public static final JDAWebhookClient WEBHOOK;
   static {
     String THREAD_ID = System.getenv("DISCORD_THREAD_ID");
-    JDAWebhookClient HOOK = new WebhookClientBuilder(System.getenv("DISCORD_WEBHOOK")).buildJDA();
+    JDAWebhookClient HOOK = new WebhookClientBuilder(System.getenv("FLUXER_WEBHOOK")).buildJDA();
     if (!THREAD_ID.isEmpty()) {
       WEBHOOK = HOOK.onThread(Long.parseLong(THREAD_ID));
     } else {
@@ -73,8 +74,9 @@ public class Bridge {
     }
   }
 
-  public static final JDA JDA = JDABuilder.createDefault(System.getenv("DISCORD_TOKEN"))
+  public static final JDA JDA = JDABuilder.createDefault(System.getenv("FLUXER_TOKEN"))
       .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+      .setRestConfig(new RestConfig().setBaseUrl("https://api.fem.place"))
       .build();
 
   private static HashMap<UUID, String> NAME_CACHE = new HashMap<>();

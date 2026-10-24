@@ -10,7 +10,7 @@ project(':server').repositories {
 
 project(':server').dependencies {
   jarJar(implementation("com.vdurmont:emoji-java:5.1.1"))
-  jarJar(implementation("net.dv8tion:JDA:$jda_version"){
+  jarJar(implementation("net.astr4y:JFA:$jfa_version"){
     exclude module: 'opus-java'
     exclude module: 'slf4j-api'
   })
