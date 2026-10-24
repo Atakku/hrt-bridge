@@ -34,14 +34,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.WebhookType;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.RestConfig;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.internal.entities.WebhookImpl;
+import net.dv8tion.jda.internal.requests.IncomingWebhookClientImpl;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
@@ -66,8 +65,8 @@ public class Bridge {
       .setRestConfig(new RestConfig().setBaseUrl("https://api.fem.place"))
       .build();
 
-  public static final WebhookImpl WEBHOOK = new WebhookImpl(JDA.getTextChannelById(CHANNEL_ID), 1561883304003633152L,
-      WebhookType.INCOMING);
+  private static final String[] HOOK = System.getenv("FLUXER_WEBHOOK").replaceAll("https://api.fem.place/webhooks/", "").split("/");
+  public static final IncomingWebhookClientImpl WEBHOOK = new IncomingWebhookClientImpl(Long.parseLong(HOOK[1]), HOOK[0], JDA);
 
   private static HashMap<UUID, String> NAME_CACHE = new HashMap<>();
   private static HashMap<UUID, String> ID_CACHE = new HashMap<>();
