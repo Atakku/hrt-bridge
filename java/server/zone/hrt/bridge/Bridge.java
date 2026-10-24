@@ -66,7 +66,7 @@ public class Bridge {
       .build();
 
   private static final String[] HOOK = System.getenv("FLUXER_WEBHOOK").replaceAll("https://api.fem.place/webhooks/", "").split("/");
-  public static final IncomingWebhookClientImpl WEBHOOK = new IncomingWebhookClientImpl(Long.parseLong(HOOK[1]), HOOK[0], JDA);
+  public static final IncomingWebhookClientImpl WEBHOOK = new IncomingWebhookClientImpl(Long.parseLong(HOOK[0]), HOOK[1], JDA);
 
   private static HashMap<UUID, String> NAME_CACHE = new HashMap<>();
   private static HashMap<UUID, String> ID_CACHE = new HashMap<>();
