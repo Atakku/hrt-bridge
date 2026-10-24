@@ -62,17 +62,7 @@ public class Bridge {
 
   public static final String CHANNEL_ID = System.getenv("FLUXER_CHANNEL_ID");
   public static final String OWNER = System.getenv("FLUXER_OWNER_ID");
-
-  public static final JDAWebhookClient WEBHOOK;
-  static {
-    String THREAD_ID = System.getenv("DISCORD_THREAD_ID");
-    JDAWebhookClient HOOK = new WebhookClientBuilder(System.getenv("FLUXER_WEBHOOK")).buildJDA();
-    if (!THREAD_ID.isEmpty()) {
-      WEBHOOK = HOOK.onThread(Long.parseLong(THREAD_ID));
-    } else {
-      WEBHOOK = HOOK;
-    }
-  }
+  public static final JDAWebhookClient WEBHOOK = new WebhookClientBuilder(System.getenv("FLUXER_WEBHOOK")).buildJDA();
 
   public static final JDA JDA = JDABuilder.createDefault(System.getenv("FLUXER_TOKEN"))
       .enableIntents(GatewayIntent.MESSAGE_CONTENT)
