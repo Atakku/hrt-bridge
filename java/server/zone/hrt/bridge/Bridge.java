@@ -27,11 +27,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 
-import club.minnced.discord.webhook.WebhookClientBuilder;
-import club.minnced.discord.webhook.external.JDAWebhookClient;
-import club.minnced.discord.webhook.send.AllowedMentions;
-import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
-import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.vdurmont.emoji.EmojiParser;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -39,11 +34,14 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.WebhookType;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.RestConfig;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.internal.entities.WebhookImpl;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
@@ -62,12 +60,14 @@ public class Bridge {
 
   public static final String CHANNEL_ID = System.getenv("FLUXER_CHANNEL_ID");
   public static final String OWNER = System.getenv("FLUXER_OWNER_ID");
-  public static final JDAWebhookClient WEBHOOK = new WebhookClientBuilder(System.getenv("FLUXER_WEBHOOK")).buildJDA();
 
   public static final JDA JDA = JDABuilder.createDefault(System.getenv("FLUXER_TOKEN"))
       .enableIntents(GatewayIntent.MESSAGE_CONTENT)
       .setRestConfig(new RestConfig().setBaseUrl("https://api.fem.place"))
       .build();
+
+  public static final WebhookImpl WEBHOOK = new WebhookImpl(JDA.getTextChannelById(CHANNEL_ID), 1561883304003633152L,
+      WebhookType.INCOMING);
 
   private static HashMap<UUID, String> NAME_CACHE = new HashMap<>();
   private static HashMap<UUID, String> ID_CACHE = new HashMap<>();
@@ -100,7 +100,8 @@ public class Bridge {
       NAME_CACHE.put(uuid, null);
       ID_CACHE.put(uuid, null);
       LOC_CACHE.put(uuid, null);
-      return new Tuple<String, String>(NAME_CACHE.get(uuid), "Failed to connect to hrt.zone whitelist system. Please contact Aku about this issue.");
+      return new Tuple<String, String>(NAME_CACHE.get(uuid),
+          "Failed to connect to hrt.zone whitelist system. Please contact Aku about this issue.");
     }
   }
 
@@ -119,7 +120,7 @@ public class Bridge {
     JDA.addEventListener(new ListenerAdapter() {
       @Override
       public void onMessageReceived(MessageReceivedEvent e) {
-        if (e.getAuthor().getIdLong() == WEBHOOK.getId())
+        if (e.getAuthor().getIdLong() == WEBHOOK.getIdLong())
           return;
         if (e.getChannel().getId().equals(CHANNEL_ID)) {
           String text = "";
@@ -146,7 +147,6 @@ public class Bridge {
 
   private void onServerStopped(ServerStoppedEvent event) {
     sendSystemText("🛑 Server stopped");
-    WEBHOOK.close();
     JDA.shutdown();
     try {
       if (!JDA.awaitShutdown(10, TimeUnit.SECONDS)) {
@@ -247,18 +247,12 @@ public class Bridge {
     return num + " " + name + (num > 1 ? "s" : "");
   }
 
-  private static WebhookMessageBuilder getPlayerHook(Player p) {
-    return new WebhookMessageBuilder().setAllowedMentions(AllowedMentions.none())
-        .setUsername(p.getName().tryCollapseToString())
-        .setAvatarUrl(minotar(p, "helm", 128));
-  }
-
   private static String minotar(Player p, String type, int size) {
     return String.format("https://minotar.net/%s/%s/%s.png", type, p.getUUID().toString(), size);
   }
 
-  private static WebhookMessageBuilder getSystemHook() {
-    return new WebhookMessageBuilder().setAllowedMentions(AllowedMentions.none());
+  private static MessageCreateBuilder getMessageCreator() {
+    return new MessageCreateBuilder().setAllowedMentions(List.of());
   }
 
   private static final Pattern p = Pattern.compile(":\\w+:");
@@ -281,7 +275,8 @@ public class Bridge {
   }
 
   public static void sendPlayerText(Player p, String text) {
-    WEBHOOK.send(getPlayerHook(p).setContent(text).build());
+    WEBHOOK.sendMessage(getMessageCreator().setContent(text).build()).setUsername(p.getName().tryCollapseToString())
+        .setAvatarUrl(minotar(p, "helm", 128));
   }
 
   public static void sendPlayerText(Player p, String format, Object... args) {
@@ -289,11 +284,11 @@ public class Bridge {
   }
 
   public static void sendSystemEmbed(EmbedBuilder embed) {
-    WEBHOOK.send(getSystemHook().addEmbeds(WebhookEmbedBuilder.fromJDA(embed.build()).build()).build());
+    WEBHOOK.sendMessage(getMessageCreator().addEmbeds(List.of(embed.build())).build()).queue();
   }
 
   public static void sendSystemText(String text) {
-    WEBHOOK.send(getSystemHook().setContent(text).build());
+    WEBHOOK.sendMessage(getMessageCreator().setContent(text).build()).queue();
   }
 
   public static void sendSystemText(String format, Object... args) {

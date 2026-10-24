@@ -25,10 +25,6 @@ project(':server').dependencies {
   jarJar(implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1"))
   jarJar(implementation("com.fasterxml.jackson.core:jackson-core:2.13.1"))
 
-  jarJar(implementation("club.minnced:discord-webhooks:$dw_version"){
-    exclude module: 'slf4j-api'
-  })
-
   jarJar(implementation("com.squareup.okhttp3:okhttp:4.10.0"))
   jarJar(implementation("org.json:json:20210307"))
 }
